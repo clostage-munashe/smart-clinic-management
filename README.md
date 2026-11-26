@@ -23,6 +23,12 @@ The assistant stays inactive until an OpenAI API key is configured as `OPENAI_AP
 
 For contact form email delivery, set `CONTACT_RECIPIENT_EMAIL`, `CONTACT_FROM_EMAIL` (a sender verified with your email provider), and `RESEND_API_KEY` in `backend/.env`. The server saves submissions to SQLite and sends them through the Resend Email API. If delivery isn't configured or accepted, the form reports that clearly instead of claiming the email was sent. Provider acceptance confirms the send request was accepted, but does not prove the recipient's inbox received it.
 
+## Deploy chat on Vercel
+
+The Vercel deployment serves the frontend and the `api/assistant.js` serverless endpoint. In the Vercel project, add `OPENAI_API_KEY` as a server-side Environment Variable for Production (and Preview if needed), then redeploy. Optionally set `OPENAI_MODEL`; the default is `gpt-4.1-mini`. Never use a `VITE_` prefix for the key. The local Node API uses `backend/.env`, while the Vercel function reads Vercel project environment variables.
+
+The Vercel assistant endpoint returns a visible setup or provider error when a key is missing, invalid, out of credit, or cannot access the selected model.
+
 ## Demo limitations
 
 - FAQ questions and demo settings are stored in this browser. Authentication works against the local API, but the local SQLite database and session setup are a demonstration and still need production hardening and backups.

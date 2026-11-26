@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+﻿import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 
@@ -81,15 +81,15 @@ function AssistantWidget(){
       const data=await response.json() as {answer?:string;error?:string}
       if(!response.ok)throw new Error(data.error||'Assistant request failed')
       savedAnswer=data.answer||'I don’t have an answer for that yet. Try asking about appointments, accounts or clinic directions.'
-    }catch{
-      savedAnswer='I’m having trouble reaching the assistant service. Please try again in a moment, or browse the FAQs.'
+    }catch(error){
+      savedAnswer=error instanceof Error ? error.message : 'The assistant service could not be reached. Please try again shortly.'
     }
     setMessages(old=>[...old.filter(item=>item.id!=='thinking'),{id:crypto.randomUUID(),role:'assistant',text:savedAnswer}])
     setBusy(false)
     if(user){const old=JSON.parse(localStorage.getItem('smartclinic-faq')||'[]') as Question[];if(!old.some(item=>item.text.toLowerCase()===message.toLowerCase())){old.unshift({id:crypto.randomUUID(),text:message,answer:savedAnswer,date:new Date().toISOString()});localStorage.setItem('smartclinic-faq',JSON.stringify(old))}}
   }
   const send=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();void ask(prompt)}
-  return <div className="assistant"><button className="assistant-launch" onClick={()=>setOpen(!open)} aria-label="Open clinic assistant">{open?'×':'▱'}</button>{open&&<section className="assistant-panel"><header><span className="assistant-mark">✧</span><div><b>Clinic assistant</b><small>{reminded?'Your 24-hour check-in is here.':'Ready to help · demo mode'}</small></div><button onClick={()=>setOpen(false)}>×</button></header><div className="chat-transcript" aria-live="polite">{messages.map(item=><div className={`chat-bubble ${item.role}`} key={item.id}>{item.text}</div>)}{messages.length===1&&<div className="chat-suggestions"><button onClick={()=>void ask('How do I book an appointment?')}>How do I book an appointment?</button><button onClick={()=>void ask('How can I find a clinic?')}>How can I find a clinic?</button></div>}</div><small className="chat-safety">General platform help only. Not for medical advice.</small><form onSubmit={send}><input value={prompt} onChange={event=>setPrompt(event.target.value)} placeholder="Type your question…" aria-label="Message the clinic assistant"/><button aria-label="Send question" disabled={busy}>{busy?'…':'→'}</button></form><Link to="/faq" onClick={()=>setOpen(false)}>Browse FAQs →</Link></section>}</div>
+  return <div className="assistant"><button className="assistant-launch" onClick={()=>setOpen(!open)} aria-label="Open clinic assistant">{open?'×':'▱'}</button>{open&&<section className="assistant-panel"><header><span className="assistant-mark">✧</span><div><b>Clinic assistant</b><small>{reminded?'Your 24-hour check-in is here.':'AI platform help'}</small></div><button onClick={()=>setOpen(false)}>×</button></header><div className="chat-transcript" aria-live="polite">{messages.map(item=><div className={`chat-bubble ${item.role}`} key={item.id}>{item.text}</div>)}{messages.length===1&&<div className="chat-suggestions"><button onClick={()=>void ask('How do I book an appointment?')}>How do I book an appointment?</button><button onClick={()=>void ask('How can I find a clinic?')}>How can I find a clinic?</button></div>}</div><small className="chat-safety">General platform help only. Not for medical advice.</small><form onSubmit={send}><input value={prompt} onChange={event=>setPrompt(event.target.value)} placeholder="Type your question…" aria-label="Message the clinic assistant"/><button aria-label="Send question" disabled={busy}>{busy?'…':'→'}</button></form><Link to="/faq" onClick={()=>setOpen(false)}>Browse FAQs →</Link></section>}</div>
 }
 function NotFound(){return <PageHeading eyebrow="SMART CLINIC" title="That page isn't here yet." description="Use the navigation to find a clinic feature."/>}
 function ProtectedDashboard({role}:{role:Role}){const user=getUser();return user?.role===role?<Dashboard role={role}/>:<Navigate to="/login" replace/>}
